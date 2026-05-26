@@ -1,255 +1,108 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { NavLink, useNavigate } from "react-router-dom";
-import {
-  FaBook,
-  FaHome,
-  FaUserGraduate,
-  FaCog,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import { Link } from "react-router-dom";
 
-function StudentsPage() {
+export default function StudentsPage() {
   const [students, setStudents] = useState([]);
   const [name, setName] = useState("");
   const [course, setCourse] = useState("");
-  const [contact, setContact] = useState("");
-  const navigate = useNavigate();
 
-  // ✅ Fetch Students
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/students");
-      setStudents(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+  const load = async () => {
+    const res = await axios.get("http://localhost:5000/students");
+    setStudents(res.data);
   };
 
   useEffect(() => {
-    fetchStudents();
+    load();
   }, []);
 
-  // ✅ Add Student
   const addStudent = async () => {
-    if (!name || !course || !contact) {
-      return alert("Fill all fields");
-    }
+    await axios.post("http://localhost:5000/students", {
+      name,
+      course,
+    });
 
-    try {
-      await axios.post("http://localhost:5000/api/students", {
-        name,
-        course,
-        contact,
-      });
-
-      setName("");
-      setCourse("");
-      setContact("");
-      fetchStudents();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // ✅ Approve
-  const approveStudent = async (id) => {
-    await axios.put(`http://localhost:5000/api/students/approve/${id}`);
-    fetchStudents();
-  };
-
-  // ❌ Reject
-  const rejectStudent = async (id) => {
-    await axios.put(`http://localhost:5000/api/students/reject/${id}`);
-    fetchStudents();
-  };
-
-  // ❌ Delete
-  const deleteStudent = async (id) => {
-    await axios.delete(`http://localhost:5000/api/students/${id}`);
-    fetchStudents();
-  };
-
-  // 🔐 Logout
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    setName("");
+    setCourse("");
+    load();
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* 🔷 SIDEBAR */}
-      <div className="w-64 bg-gradient-to-b from-indigo-700 to-purple-700 text-white flex flex-col justify-between">
-        <div>
-          <div className="p-5 text-xl font-bold border-b border-indigo-500">
-            🎓 Admin Panel
-          </div>
+    <div style={{ display: "flex", height: "100vh", fontFamily: "Arial" }}>
+      {/* SIDEBAR LINKS */}
+      <div
+        style={{
+          width: "250px",
+          background: "#0f172a",
+          color: "white",
+          padding: "20px",
+        }}
+      >
+        <h2>🎓 Admin Panel</h2>
 
-          <ul className="p-4 space-y-3">
-            <NavLink
-              to="/dashboard"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaHome /> Dashboard
-            </NavLink>
-
-            <NavLink
-              to="/students"
-              className="p-2 bg-indigo-600 rounded flex gap-2"
-            >
-              <FaUserGraduate /> Students
-            </NavLink>
-
-            <NavLink
-              to="/courses"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaBook /> Courses
-            </NavLink>
-
-            <NavLink
-              to="/settings"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaCog /> Settings
-            </NavLink>
-          </ul>
-        </div>
-
-        <div className="p-4">
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 p-2 rounded"
-          >
-            <FaSignOutAlt /> Logout
-          </button>
-        </div>
+        <Link to="/" style={linkStyle}>
+          🏠 Dashboard
+        </Link>
+        <Link to="/students" style={linkStyle}>
+          👨‍🎓 Students
+        </Link>
+        <Link to="/courses" style={linkStyle}>
+          📚 Courses
+        </Link>
+        <Link to="/settings" style={linkStyle}>
+          ⚙ Settings
+        </Link>
       </div>
 
-      {/* 🔷 MAIN CONTENT */}
-      <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">Students</h1>
+      {/* MAIN */}
+      <div style={{ flex: 1, padding: "20px", background: "#f1f5f9" }}>
+        <h1>Students</h1>
 
-        {/* ➕ ADD STUDENT */}
-        <div className="bg-white p-5 rounded shadow mb-6">
-          <h2 className="text-xl mb-3">Add Student</h2>
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          placeholder="Course"
+          value={course}
+          onChange={(e) => setCourse(e.target.value)}
+        />
 
-          <div className="flex gap-3">
-            <input
-              type="text"
-              placeholder="Student Name"
-              className="border p-2 rounded"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+        <button onClick={addStudent}>Add</button>
 
-            <input
-              type="text"
-              placeholder="Course"
-              className="border p-2 rounded"
-              value={course}
-              onChange={(e) => setCourse(e.target.value)}
-            />
+        <table
+          border="1"
+          width="100%"
+          cellPadding="10"
+          style={{ marginTop: "20px" }}
+        >
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Course</th>
+              <th>Status</th>
+            </tr>
+          </thead>
 
-            <input
-              type="text"
-              placeholder="Contact Number"
-              className="border p-2 rounded"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-            />
-
-            <button
-              onClick={addStudent}
-              className="bg-indigo-600 text-white px-4 rounded"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-
-        {/* 📋 STUDENT TABLE */}
-        <div className="bg-white p-5 rounded shadow">
-          <h2 className="text-xl mb-4">Student List</h2>
-
-          {students.length === 0 ? (
-            <p className="text-gray-500">No students found ❌</p>
-          ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Course</th>
-                  <th>Contact</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {students.map((s, i) => (
-                  <tr key={s._id} className="border-b">
-                    <td>{i + 1}</td>
-                    <td>{s.name}</td>
-                    <td>{s.course}</td>
-                    <td>{s.contact}</td>
-
-                    {/* STATUS */}
-                    <td>
-                      <span
-                        className={`px-2 py-1 rounded text-white ${
-                          s.status === "approved"
-                            ? "bg-green-500"
-                            : s.status === "rejected"
-                              ? "bg-red-500"
-                              : "bg-yellow-500"
-                        }`}
-                      >
-                        {s.status}
-                      </span>
-                    </td>
-
-                    {/* ACTION */}
-                    <td className="space-x-2">
-                      {s.status === "pending" && (
-                        <>
-                          <button
-                            onClick={() => approveStudent(s._id)}
-                            className="bg-green-500 text-white px-2 py-1 rounded"
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            onClick={() => rejectStudent(s._id)}
-                            className="bg-red-500 text-white px-2 py-1 rounded"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      <button
-                        onClick={() => deleteStudent(s._id)}
-                        className="bg-gray-700 text-white px-2 py-1 rounded"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          <div className="mt-4 text-gray-500 text-center">
-            Total Students: {students.length}
-          </div>
-        </div>
+          <tbody>
+            {students.map((s) => (
+              <tr key={s._id}>
+                <td>{s.name}</td>
+                <td>{s.course}</td>
+                <td>{s.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-export default StudentsPage;
+const linkStyle = {
+  display: "block",
+  color: "white",
+  textDecoration: "none",
+  marginTop: "15px",
+};

@@ -1,145 +1,167 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { NavLink, useNavigate } from "react-router-dom";
-import {
-  FaHome,
-  FaUserGraduate,
-  FaBook,
-  FaCog,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import { Link } from "react-router-dom";
+import logo from "../assets/logo.jpg";
 
-function Dashboard() {
-  const [data, setData] = useState({});
-  const navigate = useNavigate();
+export default function Dashboard() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [contact, setContact] = useState("");
+  const [course, setCourse] = useState("");
 
-  // 🔥 Fetch dashboard data
-  const fetchData = async () => {
-    const res = await axios.get("http://localhost:5000/api/dashboard");
-    setData(res.data);
-  };
+  const submitForm = async (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+    await axios.post("http://localhost:5000/students", {
+      name,
+      email,
+      contact,
+      course,
+    });
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    setName("");
+    setEmail("");
+    setContact("");
+    setCourse("");
+
+    alert("Admission Submitted Successfully ✅");
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div style={{ display: "flex", height: "100vh", fontFamily: "Arial" }}>
       {/* SIDEBAR */}
-      <div className="w-64 bg-gradient-to-b from-indigo-700 to-purple-700 text-white flex flex-col justify-between">
-        <div>
-          <div className="p-5 text-xl font-bold">🎓 Admin Panel</div>
+      <div
+        style={{
+          width: "250px",
+          background: "#0f172a",
+          color: "white",
+          padding: "20px",
+        }}
+      >
+        {/* LOGO */}
+        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+          <img
+            src={logo}
+            alt="Logo"
+            style={{
+              width: "100px",
+              height: "95px",
+              objectFit: "contain",
+              borderRadius: "10px",
+            }}
+          />
 
-          <ul className="p-4 space-y-3">
-            <NavLink
-              to="/dashboard"
-              className="p-2 bg-indigo-600 rounded flex gap-2"
-            >
-              <FaHome /> Dashboard
-            </NavLink>
-
-            <NavLink
-              to="/students"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaUserGraduate /> Students
-            </NavLink>
-
-            <NavLink
-              to="/courses"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaBook /> Courses
-            </NavLink>
-
-            <NavLink
-              to="/settings"
-              className="p-2 hover:bg-indigo-500 rounded flex gap-2"
-            >
-              <FaCog /> Settings
-            </NavLink>
-          </ul>
-        </div>
-
-        <div className="p-4">
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 p-2 rounded"
+          <h3
+            style={{
+              marginTop: "10px",
+              fontSize: "17px",
+              color: "#38bdf8",
+              fontWeight: "bold",
+              textDecoration: "underline",
+            }}
           >
-            <FaSignOutAlt /> Logout
-          </button>
+            Government Polytechnic Holealur
+          </h3>
         </div>
+        <Link to="/" style={linkStyle}>
+          🏠 Dashboard
+        </Link>
+        <Link to="/students" style={linkStyle}>
+          👨‍🎓 Students
+        </Link>
+        <Link to="/courses" style={linkStyle}>
+          📚 Courses
+        </Link>
+        <Link to="/settings" style={linkStyle}>
+          ⚙ Settings
+        </Link>
       </div>
 
-      {/* MAIN */}
-      <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      {/* MAIN CONTENT */}
+      <div style={{ flex: 1, padding: "20px", background: "#f1f5f9" }}>
+        <h1>Admission Dashboard</h1>
 
-        {/* 📊 CARDS */}
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Total Students</h3>
-            <p className="text-3xl">{data.totalStudents || 0}</p>
-          </div>
+        {/* FORM */}
+        <div style={formBox}>
+          <h2>Admission Form</h2>
 
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Total Courses</h3>
-            <p className="text-3xl">{data.totalCourses || 0}</p>
-          </div>
+          <form onSubmit={submitForm}>
+            <input
+              placeholder="Student Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={inputStyle}
+              required
+            />
 
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Pending</h3>
-            <p className="text-3xl text-yellow-500">{data.pending || 0}</p>
-          </div>
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={inputStyle}
+              required
+            />
 
-          <div className="bg-white p-5 rounded shadow">
-            <h3>Approved</h3>
-            <p className="text-3xl text-green-500">{data.approved || 0}</p>
-          </div>
-        </div>
+            <input
+              placeholder="Contact Number"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              style={inputStyle}
+              required
+            />
 
-        {/* 📋 RECENT STUDENTS */}
-        <div className="bg-white p-5 rounded shadow">
-          <h2 className="text-xl mb-4">Recent Students</h2>
+            <select
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              style={inputStyle}
+              required
+            >
+              <option value="">Select Course</option>
+              <option value="CSE">CSE</option>
+              <option value="ECE">ECE</option>
+              <option value="MECH">MECH</option>
+              <option value="CIVIL">CIVIL</option>
+            </select>
 
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th>Name</th>
-                <th>Course</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.recentStudents?.map((s) => (
-                <tr key={s._id} className="border-b">
-                  <td>{s.name}</td>
-                  <td>{s.course}</td>
-                  <td
-                    className={
-                      s.status === "approved"
-                        ? "text-green-500"
-                        : s.status === "rejected"
-                          ? "text-red-500"
-                          : "text-yellow-500"
-                    }
-                  >
-                    {s.status}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <button type="submit" style={btnStyle}>
+              Submit Admission
+            </button>
+          </form>
         </div>
       </div>
     </div>
   );
 }
 
-export default Dashboard;
+/* STYLES */
+const linkStyle = {
+  display: "block",
+  color: "white",
+  textDecoration: "none",
+  marginTop: "15px",
+  padding: "8px",
+  borderRadius: "6px",
+};
+
+const formBox = {
+  background: "white",
+  padding: "20px",
+  borderRadius: "10px",
+  width: "400px",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  marginTop: "10px",
+  marginBottom: "10px",
+};
+
+const btnStyle = {
+  padding: "10px",
+  background: "green",
+  color: "white",
+  border: "none",
+  width: "100%",
+  cursor: "pointer",
+};

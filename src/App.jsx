@@ -1,22 +1,20 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import CoursesPage from "./pages/CoursesPage";
-import StudentsPage from "./pages/StudentsPage";
-import SettingsPage from "./pages/SettingsPage";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 
-function App() {
+import Dashboard from "./pages/Dashboard";
+import StudentsPage from "./pages/StudentsPage";
+import CoursesPage from "./pages/CoursesPage";
+import SettingsPage from "./pages/SettingsPage";
+import Login from "./pages/Login";
+
+export default function App() {
   return (
     <Routes>
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" />} />
-      <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/courses" element={<CoursesPage />} />
+      <Route path="/" element={<Dashboard />} />
       <Route path="/students" element={<StudentsPage />} />
+      <Route path="/courses" element={<CoursesPage />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/login" element={<Login />} />
     </Routes>
   );
 }
-
-export default App;
