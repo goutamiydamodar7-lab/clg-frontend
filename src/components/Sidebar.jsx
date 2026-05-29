@@ -12,6 +12,8 @@ export default function Sidebar() {
 
   return (
     <div style={styles.sidebar}>
+      {/* ✅ TEST BUTTON (ADD HERE) */}
+      <button style={{ background: "yellow", color: "black" }}>TEST</button>
       {/* LOGO */}
       <div style={styles.logoBox}>
         <img src={logo} alt="Logo" style={styles.logo} />
@@ -32,23 +34,27 @@ export default function Sidebar() {
       </Link>
 
       {/* LOGOUT */}
-      <button onClick={handleLogout} style={styles.logout}>
-        🚪 Logout
-      </button>
+      <div style={{ marginTop: "auto" }}>
+        <button onClick={handleLogout} style={styles.logout}>
+          🚪 Logout
+        </button>
+      </div>
     </div>
   );
 }
 
-/* STYLES */
 const styles = {
   sidebar: {
-    width: "250px",
+    width: "260px",
     height: "100vh",
     background: "#0f172a",
     color: "white",
     padding: "20px",
     display: "flex",
     flexDirection: "column",
+    position: "fixed", // ✅ IMPORTANT
+    left: 0,
+    top: 0,
   },
 
   logoBox: {
@@ -59,9 +65,7 @@ const styles = {
   logo: {
     width: "90px",
     height: "90px",
-    objectFit: "contain",
     borderRadius: "10px",
-    border: "2px solid white",
   },
 
   link: {
@@ -75,11 +79,12 @@ const styles = {
 
   logout: {
     marginTop: "auto",
-    padding: "10px",
+    padding: "12px",
     background: "red",
     color: "white",
     border: "none",
     cursor: "pointer",
     borderRadius: "6px",
+    width: "100%", // ✅ important
   },
 };

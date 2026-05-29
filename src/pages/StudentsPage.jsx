@@ -1,96 +1,106 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
-  const [name, setName] = useState("");
-  const [course, setCourse] = useState("");
 
-  const load = async () => {
+  // GET
+  const fetchStudents = async () => {
     const res = await axios.get("http://localhost:5000/students");
     setStudents(res.data);
   };
 
   useEffect(() => {
-    load();
+    fetchStudents();
   }, []);
 
-  const addStudent = async () => {
-    await axios.post("http://localhost:5000/students", {
-      name,
-      course,
-    });
+  // DELETE
+  const deleteStudent = async (id) => {
+    await axios.delete(`http://localhost:5000/students/${id}`);
+    fetchStudents();
+  };
 
-    setName("");
-    setCourse("");
-    load();
+  // APPROVE
+  const approveStudent = async (id) => {
+    await axios.put(`http://localhost:5000/students/${id}/approve`);
+    fetchStudents();
+  };
+
+  // REJECT
+  const rejectStudent = async (id) => {
+    await axios.put(`http://localhost:5000/students/${id}/reject`);
+    fetchStudents();
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "Arial" }}>
-      {/* SIDEBAR LINKS */}
-      <div
-        style={{
-          width: "250px",
-          background: "#0f172a",
-          color: "white",
-          padding: "20px",
-        }}
-      >
-        <h2>🎓 Admin Panel</h2>
+    <div style={styles.page}>
+      <h1>👨‍🎓 Students List</h1>
 
-        <Link to="/" style={linkStyle}>
-          🏠 Dashboard
-        </Link>
-        <Link to="/students" style={linkStyle}>
-          👨‍🎓 Students
-        </Link>
-        <Link to="/courses" style={linkStyle}>
-          📚 Courses
-        </Link>
-        <Link to="/settings" style={linkStyle}>
-          ⚙ Settings
-        </Link>
-      </div>
-
-      {/* MAIN */}
-      <div style={{ flex: 1, padding: "20px", background: "#f1f5f9" }}>
-        <h1>Students</h1>
-
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          placeholder="Course"
-          value={course}
-          onChange={(e) => setCourse(e.target.value)}
-        />
-
-        <button onClick={addStudent}>Add</button>
-
-        <table
-          border="1"
-          width="100%"
-          cellPadding="10"
-          style={{ marginTop: "20px" }}
-        >
+      <div style={styles.card}>
+        <table style={styles.table}>
           <thead>
             <tr>
               <th>Name</th>
+              <th>Email</th>
+              <th>Contact</th>
               <th>Course</th>
               <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {students.map((s) => (
-              <tr key={s._id}>
-                <td>{s.name}</td>
-                <td>{s.course}</td>
-                <td>{s.status}</td>
+            {students.map((stu) => (
+              <tr key={stu._id}>
+                <td>{stu.name}</td>
+                <td>{stu.email}</td>
+                <td>{stu.contact}</td>
+                <td>{stu.course}</td>
+
+                {/* STATUS */}
+                <td>
+                  <span
+                    style={{
+                      ...styles.badge,
+                      background:
+                        stu.status === "Approved"
+                          ? "#22c55e"
+                          : stu.status === "Rejected"
+                            ? "#ef4444"
+                            : "#facc15",
+                    }}
+                  >
+                    {stu.status}
+                  </span>
+                </td>
+
+                {/* ACTIONS */}
+                <td>
+                  {stu.status === "Pending" && (
+                    <>
+                      <button
+                        onClick={() => approveStudent(stu._id)}
+                        style={styles.approveBtn}
+                      >
+                        Approve
+                      </button>
+
+                      <button
+                        onClick={() => rejectStudent(stu._id)}
+                        style={styles.rejectBtn}
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onClick={() => deleteStudent(stu._id)}
+                    style={styles.deleteBtn}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -100,9 +110,60 @@ export default function StudentsPage() {
   );
 }
 
-const linkStyle = {
-  display: "block",
-  color: "white",
-  textDecoration: "none",
-  marginTop: "15px",
+/* STYLES */
+const styles = {
+  page: {
+    padding: "20px",
+    background: "#f1f5f9",
+    minHeight: "100vh",
+  },
+
+  card: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+  },
+
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    textAlign: "left",
+  },
+
+  badge: {
+    padding: "5px 10px",
+    borderRadius: "6px",
+    color: "white",
+    fontSize: "12px",
+  },
+
+  approveBtn: {
+    background: "green",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginRight: "5px",
+  },
+
+  rejectBtn: {
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginRight: "5px",
+  },
+
+  deleteBtn: {
+    background: "black",
+    color: "white",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
 };

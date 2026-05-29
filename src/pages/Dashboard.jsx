@@ -1,132 +1,99 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import logo from "../assets/logo.jpg";
 
 export default function Dashboard() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [contact, setContact] = useState("");
-  const [course, setCourse] = useState("");
+  const navigate = useNavigate();
 
-  const submitForm = async (e) => {
-    e.preventDefault();
+  const ADMIN_PASSWORD = "1234";
 
-    await axios.post("http://localhost:5000/students", {
-      name,
-      email,
-      contact,
-      course,
-    });
+  const openAdminPage = (path) => {
+    const pass = prompt("Enter Admin Password:");
 
-    setName("");
-    setEmail("");
-    setContact("");
-    setCourse("");
-
-    alert("Admission Submitted Successfully ✅");
+    if (pass === ADMIN_PASSWORD) {
+      navigate(path);
+    } else {
+      alert("❌ Wrong Password");
+    }
   };
 
-  return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "Arial" }}>
-      {/* SIDEBAR */}
-      <div
-        style={{
-          width: "250px",
-          background: "#0f172a",
-          color: "white",
-          padding: "20px",
-        }}
-      >
-        {/* LOGO */}
-        <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <img
-            src={logo}
-            alt="Logo"
-            style={{
-              width: "100px",
-              height: "95px",
-              objectFit: "contain",
-              borderRadius: "10px",
-            }}
-          />
+  // 🔥 STATE FOR LIVE DATA
+  const [stats, setStats] = useState({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  });
 
-          <h3
-            style={{
-              marginTop: "10px",
-              fontSize: "17px",
-              color: "#38bdf8",
-              fontWeight: "bold",
-              textDecoration: "underline",
-            }}
-          >
-            Government Polytechnic Holealur
-          </h3>
+  // 🔥 FETCH DATA FROM BACKEND
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/dashboard")
+      .then((res) => {
+        setStats(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+  // 🔥 CARDS WITH LIVE DATA
+  const cards = [
+    { title: "Total Students", value: stats.total, color: "#2563eb" },
+    { title: "Approved", value: stats.approved, color: "#16a34a" },
+    { title: "Pending", value: stats.pending, color: "#f59e0b" },
+    { title: "Rejected", value: stats.rejected, color: "#ef4444" },
+  ];
+
+  return (
+    <div style={{ padding: "20px", background: "#f8fafc", minHeight: "100vh" }}>
+      {/* HEADER */}
+      <div style={styles.header}>
+        <h2>📊 College Dashboard</h2>
+
+        {/* ADMIN BUTTON */}
+        <div
+          style={styles.admin}
+          onClick={() => openAdminPage("/admin-profile")}
+        >
+          👤 Admin
         </div>
-        <Link to="/" style={linkStyle}>
-          🏠 Dashboard
-        </Link>
-        <Link to="/students" style={linkStyle}>
-          👨‍🎓 Students
-        </Link>
-        <Link to="/courses" style={linkStyle}>
-          📚 Courses
-        </Link>
-        <Link to="/settings" style={linkStyle}>
-          ⚙ Settings
-        </Link>
       </div>
 
-      {/* MAIN CONTENT */}
-      <div style={{ flex: 1, padding: "20px", background: "#f1f5f9" }}>
-        <h1>Admission Dashboard</h1>
+      {/* CARDS */}
+      <div style={styles.grid}>
+        {cards.map((c, i) => (
+          <div
+            key={i}
+            style={{
+              ...styles.card,
+              borderTop: `4px solid ${c.color}`,
+            }}
+          >
+            <h4>{c.title}</h4>
+            <h1>{c.value}</h1>
+          </div>
+        ))}
+      </div>
 
-        {/* FORM */}
-        <div style={formBox}>
-          <h2>Admission Form</h2>
+      {/* NOTICE PANEL */}
+      <div style={styles.panel}>
+        <h3>📢 Notices</h3>
+        <p>• Admission open for 2026 batch</p>
+        <p>• Exam timetable released</p>
+        <p>• Fee payment last date extended</p>
+      </div>
 
-          <form onSubmit={submitForm}>
-            <input
-              placeholder="Student Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={inputStyle}
-              required
-            />
+      {/* FACILITIES */}
+      <div style={styles.panel}>
+        <h3>🏫 Facilities</h3>
 
-            <input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-              required
-            />
-
-            <input
-              placeholder="Contact Number"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              style={inputStyle}
-              required
-            />
-
-            <select
-              value={course}
-              onChange={(e) => setCourse(e.target.value)}
-              style={inputStyle}
-              required
-            >
-              <option value="">Select Course</option>
-              <option value="CSE">CSE</option>
-              <option value="ECE">ECE</option>
-              <option value="MECH">MECH</option>
-              <option value="CIVIL">CIVIL</option>
-            </select>
-
-            <button type="submit" style={btnStyle}>
-              Submit Admission
-            </button>
-          </form>
+        <div style={styles.grid}>
+          <div style={styles.item}>📶 Wi-Fi Campus</div>
+          <div style={styles.item}>📚 Library & Digital Library</div>
+          <div style={styles.item}>🏠 Hostel Facility</div>
+          <div style={styles.item}>🏏 Sports Ground</div>
+          <div style={styles.item}>💻 Computer Labs</div>
+          <div style={styles.item}>🏛️ Govt Scholarship</div>
+          <div style={styles.item}>🎯 Job Opportunities</div>
         </div>
       </div>
     </div>
@@ -134,34 +101,50 @@ export default function Dashboard() {
 }
 
 /* STYLES */
-const linkStyle = {
-  display: "block",
-  color: "white",
-  textDecoration: "none",
-  marginTop: "15px",
-  padding: "8px",
-  borderRadius: "6px",
-};
+const styles = {
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
 
-const formBox = {
-  background: "white",
-  padding: "20px",
-  borderRadius: "10px",
-  width: "400px",
-};
+  admin: {
+    background: "#0f172a",
+    color: "white",
+    padding: "8px 14px",
+    borderRadius: "6px",
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
 
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "10px",
-  marginBottom: "10px",
-};
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
+    marginTop: "20px",
+  },
 
-const btnStyle = {
-  padding: "10px",
-  background: "green",
-  color: "white",
-  border: "none",
-  width: "100%",
-  cursor: "pointer",
+  card: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    textAlign: "center",
+  },
+
+  panel: {
+    marginTop: "30px",
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  },
+
+  item: {
+    background: "#f1f5f9",
+    padding: "10px",
+    borderRadius: "8px",
+    textAlign: "center",
+  },
 };
