@@ -4,7 +4,7 @@ import axios from "axios";
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
 
-  // GET
+  // GET DATA
   const fetchStudents = async () => {
     const res = await axios.get("http://localhost:5000/students");
     setStudents(res.data);
@@ -32,138 +32,88 @@ export default function StudentsPage() {
     fetchStudents();
   };
 
+  // STATUS STYLE
+  const getStatusClass = (status) => {
+    if (status === "Approved") return "bg-green-100 text-green-600";
+    if (status === "Rejected") return "bg-red-100 text-red-600";
+    return "bg-yellow-100 text-yellow-600";
+  };
+
   return (
-    <div style={styles.page}>
-      <h1>👨‍🎓 Students List</h1>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">👨‍🎓 Students List</h1>
 
-      <div style={styles.card}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Contact</th>
-              <th>Course</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {students.map((stu) => (
-              <tr key={stu._id}>
-                <td>{stu.name}</td>
-                <td>{stu.email}</td>
-                <td>{stu.contact}</td>
-                <td>{stu.course}</td>
-
-                {/* STATUS */}
-                <td>
-                  <span
-                    style={{
-                      ...styles.badge,
-                      background:
-                        stu.status === "Approved"
-                          ? "#22c55e"
-                          : stu.status === "Rejected"
-                            ? "#ef4444"
-                            : "#facc15",
-                    }}
-                  >
-                    {stu.status}
-                  </span>
-                </td>
-
-                {/* ACTIONS */}
-                <td>
-                  {stu.status === "Pending" && (
-                    <>
-                      <button
-                        onClick={() => approveStudent(stu._id)}
-                        style={styles.approveBtn}
-                      >
-                        Approve
-                      </button>
-
-                      <button
-                        onClick={() => rejectStudent(stu._id)}
-                        style={styles.rejectBtn}
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-
-                  <button
-                    onClick={() => deleteStudent(stu._id)}
-                    style={styles.deleteBtn}
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="bg-white p-6 rounded-xl shadow">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            {/* HEADER */}
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-3">Name</th>
+                <th className="p-3">Email</th>
+                <th className="p-3">Contact</th>
+                <th className="p-3">Course</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            {/* BODY */}
+            <tbody>
+              {students.map((stu) => (
+                <tr
+                  key={stu._id}
+                  className="border-t hover:bg-gray-50 transition"
+                >
+                  <td className="p-3">{stu.name}</td>
+                  <td className="p-3">{stu.email}</td>
+                  <td className="p-3">{stu.contact}</td>
+                  <td className="p-3">{stu.course}</td>
+
+                  {/* STATUS */}
+                  <td className="p-3">
+                    <span
+                      className={`px-3 py-1 rounded text-sm font-medium ${getStatusClass(
+                        stu.status,
+                      )}`}
+                    >
+                      {stu.status}
+                    </span>
+                  </td>
+
+                  {/* ACTIONS */}
+                  <td className="p-3 flex gap-2">
+                    {stu.status === "Pending" && (
+                      <>
+                        <button
+                          onClick={() => approveStudent(stu._id)}
+                          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                        >
+                          ✓
+                        </button>
+
+                        <button
+                          onClick={() => rejectStudent(stu._id)}
+                          className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                        >
+                          ✕
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      onClick={() => deleteStudent(stu._id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                      🗑
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
-
-/* STYLES */
-const styles = {
-  page: {
-    padding: "20px",
-    background: "#f1f5f9",
-    minHeight: "100vh",
-  },
-
-  card: {
-    background: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    textAlign: "left",
-  },
-
-  badge: {
-    padding: "5px 10px",
-    borderRadius: "6px",
-    color: "white",
-    fontSize: "12px",
-  },
-
-  approveBtn: {
-    background: "green",
-    color: "white",
-    border: "none",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginRight: "5px",
-  },
-
-  rejectBtn: {
-    background: "#ef4444",
-    color: "white",
-    border: "none",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    cursor: "pointer",
-    marginRight: "5px",
-  },
-
-  deleteBtn: {
-    background: "black",
-    color: "white",
-    border: "none",
-    padding: "5px 10px",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-};
